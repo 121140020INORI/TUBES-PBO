@@ -1,23 +1,45 @@
-import pygame
+import pygame, sys
 from abc import ABC, abstractmethod
 
 pygame.init()
+pygame.mixer.init()
+
 #font untuk semuanya
-font_all = pygame.font.Font('freesansbold.ttf', 80)
-  
+font_score = pygame.font.SysFont('Monospace', 80, bold=True)
+font_menu = pygame.font.SysFont('Rockwell', 24, bold=True)
+font_bar= pygame.font.SysFont('Rockwell', 30, bold=True)
+
 #warna
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 PURPLE = (128, 0, 128)
+YELLOW = (245,204,39)
   
 #display window
 WIDTH, HEIGHT = 900, 500
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 max_score=4
 pygame.display.set_caption("Pong")
-  
+
+#sound effect
+ballhit = pygame.mixer.Sound("C:\Belajar Python\TUBES PBO\mixkit-hitting-the-basketball-ball-2096.wav")
+pointbs = pygame.mixer.Sound("C:\Belajar Python\TUBES PBO\sound2.mp3")
+menubs  = pygame.mixer.Sound("C:\Belajar Python\TUBES PBO\sound1.mp3")
+winbs = pygame.mixer.Sound("C:\Belajar Python\TUBES PBO\winbs.mp3")
+
+winbs.set_volume(1)
+menubs.set_volume(1)
+pointbs.set_volume(1)
+ballhit.set_volume(1) 
 clock = pygame.time.Clock()    
 FPS = 30
+
+main_menu=False
+menu_command=0
+
+image1 = pygame.image.load("pgm.png")
+image2 = pygame.image.load("info.png")
+image3 = pygame.image.load("pgm2.png")
   
 #Abstract class
 class Pong(ABC):
@@ -73,7 +95,7 @@ class Racket(Pong):
         self.__racketRect = (self.posx, self.posy, self.width, self.height)
   
     def displayScore(self, score, x, y, color):
-        text = font_all.render(str(score), True, color)
+        text = font_score.render(str(score), False, color)
         textRect = text.get_rect()
         textRect.center = (x, y)
   
@@ -120,9 +142,11 @@ class Ball(Pong):
   
         if self.posx <= 0 and self.firstTime:
             self.firstTime = 0
+            pointbs.play()
             return 1
         elif self.posx >= WIDTH and self.firstTime:
             self.firstTime = 0
+            pointbs.play()
             return -1
         else:
             return 0
@@ -136,6 +160,7 @@ class Ball(Pong):
     # Used to reflect the ball along the X-axis
     def hit(self):
         self.xFac *= -1
+        ballhit.play()
   
     def getRect(self):
         return self.__ball
@@ -147,11 +172,11 @@ class Button:
         self.posy = posy
         self.button = pygame.rect.Rect((self.posx, self.posy), (253, 40))
         
-    def draw(self,x, y):
-        font_menu = pygame.font.Font('freesansbold.ttf', 24)
-        pygame.draw.rect(window, WHITE, self.button, 0, 5)
+    def draw(self,x, y, color):
+        self.color=color
+        pygame.draw.rect(window, self.color, self.button, 0, 5)
         pygame.draw.rect(window, BLACK, [self.posx, self.posy, 253, 40], 5, 5)
-        text2 = font_menu.render(self.text, True, BLACK)
+        text2 = font_menu.render(self.text, False, BLACK)
         window.blit(text2, (self.posx + x, self.posy + y))
         
     def check_clicked(self):
@@ -160,29 +185,19 @@ class Button:
         else:
             return False
 
-pygame.mixer.init()
-ballhit = pygame.mixer.Sound("audio/mixkit-hitting-the-basketball-ball-2096.wav")
-ballhit.set_volume(0.5)
-main_menu=False
-font = pygame.font.Font('freesansbold.ttf', 24)
-menu_command=0
-
-#gambar pada menu
-image1 = pygame.image.load("opening.png")
-image2 = pygame.image.load("info.png")
-
 def draw_menu():
+    menubs.play()
     menu_btn = Button('Main Menu', WIDTH//3 + 18, HEIGHT-140)
-    menu_btn.draw(65, 7)
+    menu_btn.draw(65, 7, WHITE)
     menu = menu_btn.check_clicked()
     return menu
 
 def draw_replay_bar():
     command = -1
     menu = Button("Back to Menu", 120, 300)
-    menu.draw(50, 7)
+    menu.draw(50, 7, WHITE)
     button3 = Button("Countinue", 120, 240)
-    button3.draw(65, 7)  
+    button3.draw(65, 7, YELLOW)  
     if menu.check_clicked():
         command = 0
     if button3.check_clicked():
@@ -190,20 +205,19 @@ def draw_replay_bar():
     return command
 
 def draw_menu_bar():
-    window.fill(PURPLE)
+    window.blit(image3, (0, 0)) 
     command = -1
     pygame.draw.rect(window, PURPLE, [100, 100, 300, 300])
     pygame.draw.rect(window, BLACK, [100, 100, 290, 280], 5)
-    tema = pygame.font.Font('freesansbold.ttf', 30)
-    txt = tema.render("PONG GAME", True, WHITE)
+    txt = font_bar.render("MAIN MENU", True, WHITE)
     window.blit(txt, (150, 127))
     # menu exit button
     menu = Button("Back to Menu", 120, 300)
-    menu.draw(50, 7)
+    menu.draw(50, 7, WHITE)
     button1 = Button("Play Game", 120, 180)
-    button1.draw(65, 7)
+    button1.draw(65, 7, WHITE)
     button2 = Button("Information", 120, 240)
-    button2.draw(60, 7)  
+    button2.draw(60, 7, WHITE)  
     if menu.check_clicked():
         command = 0
     if button1.check_clicked():
@@ -215,9 +229,9 @@ def draw_menu_bar():
 def draw_win_bar():
     command = -1
     menu = Button("Back to Menu", 40, HEIGHT-60)
-    menu.draw(50, 7)
-    button4 = Button("Restart", WIDTH-275, HEIGHT-60)
-    button4.draw(70, 7)  
+    menu.draw(50, 7, WHITE)
+    button4 = Button("Restart", WIDTH-290, HEIGHT-60)
+    button4.draw(80, 7, YELLOW)  
     if menu.check_clicked():
         command = 0
     if button4.check_clicked():
@@ -225,9 +239,10 @@ def draw_win_bar():
     return command
   
 def game_over(cek):
+    winbs.play()
     racket1.setScore()
     racket2.setScore()
-    text = font_all.render("win", True, WHITE)
+    text = font_score.render("WIN", False, YELLOW)
     if cek == 1:
         text_rect = text.get_rect(center=(WIDTH//4, HEIGHT//2))
     elif cek == 2:
@@ -236,9 +251,9 @@ def game_over(cek):
     pygame.display.update()
 
     # Defining the objects
-racket1 = Racket(20, HEIGHT//2-50, 10, WHITE, 10, 100)
-racket2 = Racket(WIDTH-30, HEIGHT//2-50, 10, WHITE, 10, 100)
-ball = Ball(WIDTH//2, HEIGHT//2, 10, WHITE, 10)
+racket1 = Racket(20, HEIGHT//2-50, 10, WHITE, 13, 100)
+racket2 = Racket(WIDTH-30, HEIGHT//2-50, 10, WHITE, 13, 100)
+ball = Ball(WIDTH//2, HEIGHT//2, 10, YELLOW, 10)
   
 racket_list = [racket1, racket2]
   
@@ -252,123 +267,136 @@ running = False
 run = True
 
 while run and running == False:
-    if main_menu:
-        if replay == False and not selesai:
-            menu_command = draw_menu_bar()
-            if menu_command != -1:
-                main_menu = False
-        elif replay == True and not selesai:
-            menu_command = draw_replay_bar()
-            if menu_command != -1:
-                main_menu = False
-        elif replay == False and selesai:
-            menu_command = draw_win_bar()
-            if menu_command != -1:
-                main_menu = False
-    
-    else:
-        window.fill(PURPLE)
-        window.blit(image1, (WIDTH//3 + 20, HEIGHT//2 - 100))  
-        main_menu = draw_menu()
-        if menu_command == 0:
-            replay = False
-            selesai = False
-            racket1_score=0
-            racket1.setScore()
-            racket2_score=0
-            racket2.setScore()
-            
-        if menu_command == 1:
-            running = True
-            selesai = False
+    try:
+        if main_menu:
+            if replay == False and not selesai:
+                menu_command = draw_menu_bar()
+                if menu_command != -1:
+                    main_menu = False
+            elif replay == True and not selesai:
+                menu_command = draw_replay_bar()
+                if menu_command != -1:
+                    main_menu = False
+            elif replay == False and selesai:
+                menu_command = draw_win_bar()
+                racket1.reset()
+                racket2.reset()
+                if menu_command != -1:
+                    main_menu = False
         
-        if menu_command == 2:
-            window.blit(image2, (WIDTH//3 + 20, HEIGHT//2 - 150)) 
+        else:
+            window.fill(PURPLE)
+            window.blit(image1, (0, 0))  
+            main_menu = draw_menu()
+            if menu_command == 0:
+                
+                replay = False
+                selesai = False
+                racket1_score=0
+                racket1.setScore()
+                racket2_score=0
+                racket2.setScore()
+                
+            if menu_command == 1:
+                window.fill(PURPLE)
+                menubs.stop()
+                winbs.stop()
+                running = True
+                selesai = False
             
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-
-    pygame.display.flip()
-    
-    while running and not selesai:
-        window.fill(BLACK)        
-        pygame.draw.line( window, WHITE, (WIDTH//2, 0), (WIDTH//2, HEIGHT), 5 )
-            # Event handling
+            if menu_command == 2:
+                window.blit(image2, (0, 0))
+                draw_menu()
+                
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-                    
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p and running:
-                    racket1.reset()
-                    racket2.reset()
-                    running = False
-                if event.key == pygame.K_UP:
-                    racket2YFac = -1
-                if event.key == pygame.K_DOWN:
-                    racket2YFac = 1
-                if event.key == pygame.K_w:
-                    racket1YFac = -1
-                if event.key == pygame.K_s:
-                    racket1YFac = 1
-                        
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    racket2YFac = 0
-                if event.key == pygame.K_w or event.key == pygame.K_s:
-                    racket1YFac = 0
-    
-            # Collision detection
-        for racket in racket_list:
-            if pygame.Rect.colliderect(ball.getRect(), racket.getRect()):
-                ballhit.play()
-                ball.hit()
-    
-            # Updating the objects
-        racket1.update(racket1YFac)
-        racket2.update(racket2YFac)
-        point = ball.update()
+                run = False
+
+        pygame.display.flip()
         
-        #Penambahan point
-        if point == -1:
-            racket1_score=racket1.getScore()
-        elif point == 1:
-            racket2_score=racket2.getScore()
-
-        #Reset posisi bola
-        if point:   
-            ball.reset()
-    
-            # Displaying the objects on the window
-        racket1.display()
-        racket2.display()
-        ball.display()
-
-        # Displaying the scores of the players
-        racket1.displayScore( racket1_score, WIDTH//4, 35, WHITE)
-        racket2.displayScore( racket2_score, WIDTH-WIDTH//4, 35, WHITE)
-
-        if racket1_score > max_score and not selesai:
-            game_over(1)
-            running = False
-            racket1_score=0
-            racket2_score=0
-            selesai=True
-            main_menu=True
-    
-        elif racket2_score > max_score and not selesai:
-            game_over(2)
-            running = False
-            racket1_score=0
-            racket2_score=0
-            selesai=True
-            main_menu=True
+        while running and not selesai:    
+            window.fill(PURPLE)   
+            pygame.draw.line( window, WHITE, (WIDTH//2, 0), (WIDTH//2, HEIGHT), 5 )
+                # Event handling
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                        
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_p and running:
+                        running = False
+                    if event.key == pygame.K_UP:
+                        racket2YFac = -1
+                    if event.key == pygame.K_DOWN:
+                        racket2YFac = 1
+                    if event.key == pygame.K_w:
+                        racket1YFac = -1
+                    if event.key == pygame.K_s:
+                        racket1YFac = 1
+                            
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                        racket2YFac = 0
+                    if event.key == pygame.K_w or event.key == pygame.K_s:
+                        racket1YFac = 0
+        
+                # Collision detection
+            for racket in racket_list:
+                if pygame.Rect.colliderect(ball.getRect(), racket.getRect()):
+                    ball.hit()
+        
+                # Updating the objects
+            racket1.update(racket1YFac)
+            racket2.update(racket2YFac)
+            point = ball.update()
             
-        if running == False:
-            if racket1_score <= max_score and racket2_score <= max_score and not selesai:
-                replay = True
+            #Penambahan point
+            if point == -1:
+                racket1_score=racket1.getScore()
+            elif point == 1:
+                racket2_score=racket2.getScore()
+
+            #Reset posisi bola
+            if point:   
+                ball.reset()
+        
+                # Displaying the objects on the window
+            racket1.display()
+            racket2.display()
+            ball.display()
+
+            # Displaying the scores of the players
+            racket1.displayScore( racket1_score, WIDTH//4, 35, WHITE)
+            racket2.displayScore( racket2_score, WIDTH-WIDTH//4, 35, WHITE)
+
+            if racket1_score > max_score and not selesai:
+                game_over(1)
+                running = False
+                racket1_score=0
+                racket2_score=0
+                selesai=True
+                main_menu=True
+        
+            elif racket2_score > max_score and not selesai:
+                game_over(2)
+                running = False
+                racket1_score=0
+                racket2_score=0
+                selesai=True
                 main_menu=True
                 
-        pygame.display.update()
-        clock.tick(FPS)
+            if running == False:
+                if racket1_score <= max_score and racket2_score <= max_score and not selesai:
+                    replay = True
+                    main_menu=True
+                    
+            pygame.display.update()
+            clock.tick(FPS)
+            
+    except pygame.error as error:
+        print("Pygame Error", error)
+        sys.exit()
+        
+    except Exception as error:
+        print("An error occurred", error)
+        sys.exit()
