@@ -18,7 +18,7 @@ YELLOW = (245,204,39)
 #display window and inistial value
 WIDTH, HEIGHT = 900, 500
 window = pygame.display.set_mode((WIDTH, HEIGHT))
-max_score=4
+max_score=9
 main_menu=False
 menu_command=0
 pygame.display.set_caption("Pong")
