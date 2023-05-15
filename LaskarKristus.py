@@ -190,8 +190,14 @@ class Button:
 
 def draw_menu():
     menubs.play()
-    menu_btn = Button('Main Menu', WIDTH//3 + 18, HEIGHT-140)
-    menu_btn.draw(65, 7, WHITE)
+    if menu_command !=2:
+        menu_btn = Button('Main Menu', WIDTH//3 + 18, HEIGHT-140)
+        menu_btn.draw(65, 7, WHITE)
+        
+    elif menu_command == 2:
+        menu_btn = Button('Back', WIDTH//3 + 18, HEIGHT-140)
+        menu_btn.draw(100, 7, WHITE)
+        
     menu = menu_btn.check_clicked()
     return menu
 
