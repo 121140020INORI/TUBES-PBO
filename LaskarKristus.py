@@ -116,6 +116,7 @@ class Ball(Pong):
         # it results in a reflection
         if self.posy <= 0 or self.posy >= HEIGHT:
             self.yFac *= -1
+            ballhit.play()
   
         if self.posx <= 0 and self.firstTime:
             self.firstTime = 0
@@ -159,6 +160,9 @@ class Button:
         else:
             return False
 
+pygame.mixer.init()
+ballhit = pygame.mixer.Sound("audio/mixkit-hitting-the-basketball-ball-2096.wav")
+ballhit.set_volume(0.5)
 main_menu=False
 font = pygame.font.Font('freesansbold.ttf', 24)
 menu_command=0
@@ -318,6 +322,7 @@ while run and running == False:
             # Collision detection
         for racket in racket_list:
             if pygame.Rect.colliderect(ball.getRect(), racket.getRect()):
+                ballhit.play()
                 ball.hit()
     
             # Updating the objects
