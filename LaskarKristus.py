@@ -24,10 +24,10 @@ menu_command=0
 pygame.display.set_caption("Pong")
 
 #sound effect
-ballhit = pygame.mixer.Sound("C:\Belajar Python\TUBES PBO\mixkit-hitting-the-basketball-ball-2096.wav")
-pointbs = pygame.mixer.Sound("C:\Belajar Python\TUBES PBO\sound2.mp3")
-menubs  = pygame.mixer.Sound("C:\Belajar Python\TUBES PBO\sound1.mp3")
-winbs = pygame.mixer.Sound("C:\Belajar Python\TUBES PBO\winbs.mp3")
+ballhit = pygame.mixer.Sound("mixkit-hitting-the-basketball-ball-2096.wav")
+pointbs = pygame.mixer.Sound("sound2.mp3")
+menubs  = pygame.mixer.Sound("sound1.mp3")
+winbs = pygame.mixer.Sound("win.mp3")
 
 #volume of sound
 winbs.set_volume(1)
@@ -203,7 +203,7 @@ def draw_menu():
 
 def draw_replay_bar():
     command = -1
-    menu = Button("Back to Menu", 120, 300)
+    menu = Button("Back to Home", 120, 300)
     menu.draw(50, 7, WHITE)
     button3 = Button("Countinue", 120, 240)
     button3.draw(65, 7, YELLOW)  
@@ -236,7 +236,7 @@ def draw_menu_bar():
 
 def draw_win_bar():
     command = -1
-    menu = Button("Back to Menu", 40, HEIGHT-60)
+    menu = Button("Back to Home", 40, HEIGHT-60)
     menu.draw(50, 7, WHITE)
     button4 = Button("Restart", WIDTH-290, HEIGHT-60)
     button4.draw(80, 7, YELLOW)  
@@ -333,7 +333,7 @@ while run and running == False:
                     sys.exit()
                         
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_p and running:
+                    if event.key == pygame.K_SPACE and running:
                         running = False
                     if event.key == pygame.K_UP:
                         racket2YFac = -1
